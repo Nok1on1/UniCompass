@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36310.24 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniCompass", "UniCompass.csproj", "{C4209249-1432-473B-93EB-39B1530611EB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C4209249-1432-473B-93EB-39B1530611EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4209249-1432-473B-93EB-39B1530611EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4209249-1432-473B-93EB-39B1530611EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4209249-1432-473B-93EB-39B1530611EB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4727DFB1-4047-4C69-9252-54E8BC4D6205}
+	EndGlobalSection
+EndGlobal
