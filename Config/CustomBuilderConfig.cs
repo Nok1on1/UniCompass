@@ -1,5 +1,8 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using CloudinaryDotNet;
+using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 using Supabase;
+using UniCompass.Config;
 
 namespace UniCompass.config
 {
@@ -60,6 +63,17 @@ namespace UniCompass.config
                 "admin",
                 (_, _) => new Client(pgUrl, adminPgKey, pgOptions)
             );
+
+            builder.Services.Configure<CloudinarySettings>(
+                builder.Configuration.GetSection("CloudinarySettings")
+            );
+
+            builder.Services.AddSingleton(s =>
+            {
+                var config = s.GetRequiredService<IOptions<CloudinarySettings>>().Value;
+                var account = new Account(config.CloudName, config.ApiKey, config.ApiSecret);
+                return new Cloudinary(account);
+            });
 
             builder.Services.AddCors(options =>
             {
