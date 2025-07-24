@@ -12,7 +12,6 @@ namespace UniCompass.Controllers
     {
         private readonly IMapper _mapper;
         private readonly Supabase.Client _userClient;
-
         private readonly Cloudinary _cloudinary;
 
         public UserController(
@@ -26,81 +25,67 @@ namespace UniCompass.Controllers
             _cloudinary = cloudinary;
         }
 
-        [HttpGet("GetAllUsers")]
-        public async Task<IActionResult> GetAllUsers()
+        [HttpGet("GetCurrentUser")]
+        public async Task<IActionResult> GetCurrentUser()
         {
-            var response = await _userClient.From<Models.Users>().Get();
-            var userDtos = _mapper.Map<List<UserDto>>(response.Models);
+            var response = _userClient.Auth.CurrentUser;
 
-            return Ok(userDtos);
-        }
+            if (response == null)
+                return Unauthorized("User not authenticated.");
 
-        [HttpGet("GetUserById")]
-        public async Task<IActionResult> GetUserById(Guid id)
-        {
-            var response = await _userClient.From<Models.Users>().Where(x => x.UserId == id).Get();
+            if (!Guid.TryParse(response.Id, out var userGuid))
+                return Unauthorized("Invalid user ID.");
 
-            var user = response.Models.FirstOrDefault();
-
-            if (user == null)
-                return NotFound();
-
-            var userDto = _mapper.Map<UserDto>(user);
-
-            return Ok(userDto);
-        }
-
-        [HttpGet("GetUserByEmail")]
-        public async Task<IActionResult> GetUserByEmail(string email)
-        {
-            var response = await _userClient
+            var userDb = await _userClient
                 .From<Models.Users>()
-                .Where(x => x.Email == email)
-                .Get();
+                .Where(x => x.UserId == userGuid)
+                .Single();
 
-            var userDto = _mapper.Map<UserDto>(response.Models.FirstOrDefault());
+            if (userDb == null)
+                return NotFound("User not found.");
+
+            var userDto = _mapper.Map<UserDto>(userDb);
 
             return Ok(userDto);
         }
 
         [HttpPut("UpdateUserPhoto")]
-        public async Task<IActionResult> UpdateUserPhoto(
-            Guid userId,
-            [FromForm] IFormFile? profileImage = null
-        )
+        public async Task<IActionResult> UpdateUserPhoto(IFormFile? profileImage)
         {
-            var uploadResult = new ImageUploadResult();
+            var userId = _userClient.Auth.CurrentUser?.Id;
+
+            if (!Guid.TryParse(userId, out var userGuid))
+                return Unauthorized("Invalid user ID.");
 
             var userDb = await _userClient
                 .From<Models.Users>()
-                .Where(x => x.UserId == userId)
+                .Where(x => x.UserId == userGuid)
                 .Get();
 
-            var user = _mapper.Map<Models.Users>(userDb.Models.FirstOrDefault());
+            var user = _mapper.Map<UserDto>(userDb.Models.FirstOrDefault());
+
+            var uploadResult = new ImageUploadResult();
 
             if (profileImage != null && profileImage.Length > 0)
             {
-                if (user.ProfilePictureUrl != null)
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+                var fileExtension = Path.GetExtension(profileImage.FileName).ToLowerInvariant();
+
+                if (!allowedExtensions.Contains(fileExtension))
+                    return BadRequest("Invalid file type. Only image files are allowed.");
+
+                if (user.PhotoUrl != null)
                 {
-                    // Delete existing profile picture if it exists
-                    var deleteParams = new DeletionParams(user.ProfilePicturePublicId);
+                    // Delete existing photo if it exists
+                    var deleteParams = new DeletionParams(user.PhotoPublicId);
 
                     var deleteResult = await _cloudinary.DestroyAsync(deleteParams);
 
                     if (deleteResult.StatusCode != System.Net.HttpStatusCode.OK)
                         return StatusCode(
                             500,
-                            $"Failed to delete existing profile picture: {deleteResult.Error.Message}"
+                            $"Failed to delete existing photo: {deleteResult.Error.Message}"
                         );
-                }
-
-                // Validate file type (optional)
-                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                var fileExtension = Path.GetExtension(profileImage.FileName).ToLowerInvariant();
-
-                if (!allowedExtensions.Contains(fileExtension))
-                {
-                    return BadRequest("Invalid file type. Only image files are allowed.");
                 }
 
                 // Generate unique filename
@@ -111,7 +96,11 @@ namespace UniCompass.Controllers
                 var uploadParams = new ImageUploadParams
                 {
                     File = new FileDescription(fileName, stream),
-                    Transformation = new Transformation().Height(500).Width(500).Crop("fill"),
+                    Transformation = new Transformation()
+                        .Height(400)
+                        .Width(400)
+                        .Crop("fill")
+                        .Quality("auto"),
                     Folder = "profile-images",
                 };
 
@@ -125,23 +114,30 @@ namespace UniCompass.Controllers
 
                 await _userClient
                     .From<Models.Users>()
-                    .Where(x => x.UserId == userId)
-                    .Set(x => x.ProfilePictureUrl, url)
-                    .Set(x => x.ProfilePicturePublicId, publicId)
+                    .Where(x => x.UserId == userGuid)
+                    .Set(x => x.PhotoUrl, url)
+                    .Set(x => x.PhotoPublicId, publicId)
                     .Update();
 
-                return Ok();
+                return Ok(
+                    new
+                    {
+                        Message = "Profile photo updated successfully.",
+                        PhotoUrl = url,
+                        PhotoPublicId = publicId,
+                    }
+                );
             }
             else
             {
                 await _userClient
                     .From<Models.Users>()
-                    .Where(x => x.UserId == userId)
-                    .Set(x => x.ProfilePictureUrl, "")
-                    .Set(x => x.ProfilePicturePublicId, "")
+                    .Where(x => x.UserId == userGuid)
+                    .Set(x => x.PhotoUrl, "")
+                    .Set(x => x.PhotoPublicId, "")
                     .Update();
 
-                return StatusCode(500, "Failed to upload profile picture.");
+                return StatusCode(500, "Failed to upload photo.");
             }
         }
     }

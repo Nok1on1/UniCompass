@@ -9,5 +9,8 @@ public class userMappingProfile : Profile
     {
         CreateMap<Users, UserDto>();
         CreateMap<Users, LightUserDto>();
+        CreateMap<CreateUserDto, Users>()
+            .ForMember(dest => dest.UserId, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
     }
 }

@@ -12,12 +12,6 @@ namespace UniCompass.Models
         [Column("username")]
         public string? Username { get; set; }
 
-        [Column("email")]
-        public string? Email { get; set; }
-
-        [Column("password_hash")]
-        public string? PasswordHash { get; set; }
-
         [Column("user_type")]
         public string? UserType { get; set; }
 
@@ -27,17 +21,11 @@ namespace UniCompass.Models
         [Column("last_name")]
         public string? LastName { get; set; }
 
-        [Column("registration_date")]
-        public DateTime? RegistrationDate { get; set; }
+        [Column("photo_url")]
+        public string? PhotoUrl { get; set; }
 
-        [Column("is_verified")]
-        public bool? IsVerified { get; set; }
-
-        [Column("profile_picture_url")]
-        public string? ProfilePictureUrl { get; set; }
-
-        [Column("profile_picture_public_id")]
-        public string? ProfilePicturePublicId { get; set; }
+        [Column("photo_public_id")]
+        public string? PhotoPublicId { get; set; }
 
         [Column("bio")]
         public string? Bio { get; set; }
