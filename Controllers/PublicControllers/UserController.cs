@@ -133,12 +133,52 @@ namespace UniCompass.Controllers
                 await _userClient
                     .From<Models.Users>()
                     .Where(x => x.UserId == userGuid)
-                    .Set(x => x.PhotoUrl, "")
-                    .Set(x => x.PhotoPublicId, "")
+                    .Set(x => x.PhotoUrl, null)
+                    .Set(x => x.PhotoPublicId, null)
                     .Update();
 
                 return StatusCode(500, "Failed to upload photo.");
             }
+        }
+
+        [HttpPut("DeleteUserPhoto")]
+        public async Task<IActionResult> DeleteUserPhoto()
+        {
+            var userId = _userClient.Auth.CurrentUser?.Id;
+
+            if (!Guid.TryParse(userId, out var userGuid))
+                return Unauthorized("Invalid user ID.");
+
+            var userDb = await _userClient
+                .From<Models.Users>()
+                .Where(x => x.UserId == userGuid)
+                .Single();
+
+            if (userDb == null)
+                return NotFound("User not found.");
+
+            if (userDb.PhotoPublicId == null)
+                return BadRequest("User profile does not have a photo to delete.");
+
+            // Delete existing photo if it exists
+            var deleteParams = new DeletionParams(userDb.PhotoPublicId);
+
+            var deleteResult = await _cloudinary.DestroyAsync(deleteParams);
+
+            if (deleteResult.StatusCode != System.Net.HttpStatusCode.OK)
+                return StatusCode(
+                    500,
+                    $"Failed to delete existing photo: {deleteResult.Error.Message}"
+                );
+
+            await _userClient
+                .From<Models.Users>()
+                .Where(x => x.UserId == userGuid)
+                .Set(x => x.PhotoUrl, null)
+                .Set(x => x.PhotoPublicId, null)
+                .Update();
+
+            return Ok("User photo deleted successfully.");
         }
     }
 }

@@ -19,6 +19,16 @@ namespace UniCompass.Controllers
             _mapper = imapper;
         }
 
+        /// <summary>
+        /// Registers a new user using the provided registration details.
+        /// This endpoint is intended for backend use only; frontend applications should implement Supabase authentication directly.
+        /// </summary>
+        /// <param name="registerDto">The registration data transfer object containing user email and password.</param>
+        /// <returns>
+        /// Returns <see cref="IActionResult"/> indicating the result of the registration process.
+        /// If registration is successful, returns HTTP 200 with a success message.
+        /// If registration fails, returns HTTP 400 with an error message.
+        /// </returns>
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
@@ -35,6 +45,11 @@ namespace UniCompass.Controllers
             return Ok("User registered successfully.");
         }
 
+        /// <summary>
+        /// This controller is intended for backend use only; frontend applications should interact with Supabase authentication directly.
+        /// </summary>
+        /// <param name="loginDto"></param>
+        /// <returns>Token Cookies</returns>
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] RegisterDto loginDto)
         {
@@ -52,6 +67,33 @@ namespace UniCompass.Controllers
                     return Unauthorized("Invalid email or password.");
                 }
 
+                var accessToken = session.AccessToken;
+                var refreshToken = session.RefreshToken;
+
+                Response.Cookies.Append(
+                    "x-access-token",
+                    accessToken,
+                    new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.Lax,
+                        Expires = DateTimeOffset.UtcNow.AddSeconds(5),
+                    }
+                );
+
+                Response.Cookies.Append(
+                    "x-refresh-token",
+                    refreshToken,
+                    new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.Lax,
+                        Expires = DateTimeOffset.UtcNow.AddDays(7),
+                    }
+                );
+
                 return Ok("User logged in successfully.");
             }
             catch (Exception ex)
@@ -60,10 +102,17 @@ namespace UniCompass.Controllers
             }
         }
 
+        /// <summary>
+        /// This controller is intended for backend use only; frontend applications should interact with Supabase authentication directly.
+        /// </summary>
+        /// <returns>Token Cookies</returns>
         [HttpGet("Logout")]
         public async Task<IActionResult> Logout()
         {
             await _supabase.Auth.SignOut();
+
+            Response.Cookies.Delete("access-token");
+            Response.Cookies.Delete("refresh-token");
 
             return Ok("User logged out successfully.");
         }
@@ -76,6 +125,16 @@ namespace UniCompass.Controllers
             if (currentUser == null)
             {
                 return Unauthorized("User not authenticated.");
+            }
+
+            if (createUserDto.UserType == "ADMIN")
+            {
+                // Flag the user for admin review or log the request
+                // For example, you could log this event or set a property in the database
+                // Here, just return a message for demonstration
+                return Forbid(
+                    "Admin registration requires approval. Your request has been flagged."
+                );
             }
 
             if (!Guid.TryParse(currentUser.Id, out var userGuid))
