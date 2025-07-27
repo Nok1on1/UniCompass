@@ -3,11 +3,12 @@ using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using UniCompass.DTOs;
 using UniCompass.DTOs.UniversityDtos;
 
 namespace UniCompass.Controllers.AdminControllers
 {
-    [Route("api/[controller]")]
+    [Route("api/Admin/[controller]")]
     [ApiController]
     public class AdminUniversityController : ControllerBase
     {
@@ -143,6 +144,21 @@ namespace UniCompass.Controllers.AdminControllers
                 .Update();
 
             return Ok("University photo updated successfully.");
+        }
+
+        [HttpGet("GetAllUniversities")]
+        public async Task<IActionResult> GetAllUniversities()
+        {
+            var universities = await _supabase.From<Models.Universities>().Get();
+
+            if (universities.Models.Count == 0)
+            {
+                return NotFound("No universities found.");
+            }
+
+            var universityDtos = _mapper.Map<List<UniversityDto>>(universities.Models);
+
+            return Ok(universityDtos);
         }
     }
 }

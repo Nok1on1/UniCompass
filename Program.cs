@@ -26,6 +26,14 @@ public static class Program
 
         app.UseMiddleware<SupabaseSessionMiddleware>();
 
+        app.Map(
+            "/api/Admin",
+            adminApp =>
+            {
+                adminApp.UseMiddleware<AdminCheckMiddleware>();
+            }
+        );
+
         app.MapControllers();
 
         app.Run();

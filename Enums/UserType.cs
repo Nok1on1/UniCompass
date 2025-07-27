@@ -1,8 +1,8 @@
 namespace UniCompass;
 
-public enum UserType
+public static class UserType
 {
-    STUDENT,
-    TEACHER,
-    ADMIN,
+    public const string STUDENT = "STUDENT";
+    public const string TEACHER = "TEACHER";
+    public const string ADMIN = "ADMIN";
 }
