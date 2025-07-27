@@ -26,5 +26,8 @@ namespace UniCompass.Models
 
         [Column("created_at")]
         public DateTime? CreatedAt { get; set; }
+
+        [Column("bio")]
+        public String? Bio { get; set; }
     }
 }

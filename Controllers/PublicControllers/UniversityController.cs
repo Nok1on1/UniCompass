@@ -8,7 +8,7 @@ namespace UniCompass.Controllers
     {
         private readonly Supabase.Client _supabase;
 
-        public UniversityController(Supabase.Client supabase)
+        public UniversityController([FromKeyedServices("user")] Supabase.Client supabase)
         {
             _supabase = supabase;
         }
@@ -26,6 +26,22 @@ namespace UniCompass.Controllers
             var universities = response.Models;
 
             return Ok(universities);
+        }
+
+        [HttpGet("GetUniversityById")]
+        public async Task<IActionResult> GetUniversityById(int universityId)
+        {
+            var response = await _supabase
+                .From<Models.Universities>()
+                .Where(x => x.UniversityId == universityId)
+                .Single();
+
+            if (response == null)
+            {
+                return NotFound("University not found.");
+            }
+
+            return Ok(response);
         }
     }
 }

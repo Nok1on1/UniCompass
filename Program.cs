@@ -1,4 +1,5 @@
 using UniCompass.config;
+using UniCompass.Middleware;
 
 namespace UniCompass;
 
@@ -22,6 +23,16 @@ public static class Program
         app.UseHttpsRedirection();
 
         app.UseAuthorization();
+
+        app.UseMiddleware<SupabaseSessionMiddleware>();
+
+        app.Map(
+            "/api/Admin",
+            adminApp =>
+            {
+                adminApp.UseMiddleware<AdminCheckMiddleware>();
+            }
+        );
 
         app.MapControllers();
 

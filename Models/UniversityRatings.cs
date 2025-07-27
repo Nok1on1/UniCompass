@@ -4,7 +4,7 @@ using Supabase.Postgrest.Models;
 namespace UniCompass.Models
 {
     [Table("university_ratings")]
-    public class University_Ratings : BaseModel
+    public class UniversityRatings : BaseModel
     {
         [PrimaryKey("rating_id")]
         [Column("rating_id")]
@@ -29,5 +29,11 @@ namespace UniCompass.Models
 
         [Column("likes")]
         public int? Likes { get; set; }
+
+        [Column("deleted_at")]
+        public DateTime? DeletedAt { get; set; }
+
+        [Column("is_deleted")]
+        public bool IsDeleted { get; set; }
     }
 }
