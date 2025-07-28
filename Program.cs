@@ -8,9 +8,7 @@ public static class Program
     static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
         builder = CustomBuilderConfig.ApplyConfig(builder);
-
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -21,17 +19,14 @@ public static class Program
         }
 
         app.UseHttpsRedirection();
-
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.UseMiddleware<SupabaseSessionMiddleware>();
 
-        app.Map(
-            "/api/Admin",
-            adminApp =>
-            {
-                adminApp.UseMiddleware<AdminCheckMiddleware>();
-            }
+        app.UseWhen(
+            context => context.Request.Path.StartsWithSegments("/api/Admin"),
+            adminApp => adminApp.UseMiddleware<AdminCheckMiddleware>()
         );
 
         app.MapControllers();

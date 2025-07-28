@@ -7,7 +7,8 @@ namespace UniCompass.Models
     public class Universities : BaseModel
     {
         [PrimaryKey("university_id")]
-        public int UniversityId { get; set; }
+        [Column("university_id")]
+        public string? UniversityId { get; set; }
 
         [Column("university_name")]
         public string? UniversityName { get; set; }
