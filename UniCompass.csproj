@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- Suppress CS1591 -->
     <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference
