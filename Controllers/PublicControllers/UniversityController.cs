@@ -29,7 +29,7 @@ namespace UniCompass.Controllers
         }
 
         [HttpGet("GetUniversityById")]
-        public async Task<IActionResult> GetUniversityById(int universityId)
+        public async Task<IActionResult> GetUniversityById(string universityId)
         {
             var response = await _supabase
                 .From<Models.Universities>()

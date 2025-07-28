@@ -23,12 +23,6 @@ namespace UniCompass.Controllers
         /// Registers a new user using the provided registration details.
         /// This endpoint is intended for backend use only; frontend applications should implement Supabase authentication directly.
         /// </summary>
-        /// <param name="registerDto">The registration data transfer object containing user email and password.</param>
-        /// <returns>
-        /// Returns <see cref="IActionResult"/> indicating the result of the registration process.
-        /// If registration is successful, returns HTTP 200 with a success message.
-        /// If registration fails, returns HTTP 400 with an error message.
-        /// </returns>
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
@@ -48,7 +42,6 @@ namespace UniCompass.Controllers
         /// <summary>
         /// This controller is intended for backend use only; frontend applications should interact with Supabase authentication directly.
         /// </summary>
-        /// <param name="loginDto"></param>
         /// <returns>Token Cookies</returns>
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] RegisterDto loginDto)
