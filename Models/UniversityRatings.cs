@@ -12,7 +12,7 @@ namespace UniCompass.Models
 
         [Reference(typeof(Universities))]
         [Column("university_id")]
-        public int UniversityId { get; set; }
+        public string? UniversityId { get; set; }
 
         [Reference(typeof(Users))]
         [Column("user_id")]

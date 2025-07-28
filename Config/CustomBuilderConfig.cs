@@ -1,4 +1,5 @@
-﻿using CloudinaryDotNet;
+﻿using System.Reflection;
+using CloudinaryDotNet;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Supabase;
@@ -51,6 +52,9 @@ namespace UniCompass.config
                 c.MapType<IFormFile>(() =>
                     new OpenApiSchema { Type = "string", Format = "binary" }
                 );
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
             });
 
             builder.Services.AddAutoMapper(typeof(Program));
