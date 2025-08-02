@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.HttpOverrides;
 using UniCompass.config;
 using UniCompass.Middleware;
 
@@ -19,6 +20,14 @@ public static class Program
         }
 
         app.UseHttpsRedirection();
+        app.UseForwardedHeaders(
+            new ForwardedHeadersOptions
+            {
+                ForwardedHeaders =
+                    ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+            }
+        ); 
+
         app.UseAuthentication();
         app.UseAuthorization();
 
